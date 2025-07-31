@@ -3,3 +3,6 @@
 
 # ignore the bin folder !
 /bin
+
+# ignore vs code config folder
+/.vscode
