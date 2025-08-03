@@ -1,0 +1,17 @@
+Config files will be XML!
+
+For shader stuff:
+
+<root>
+    <program name=" {PROGRAM NAME} ">
+        <vertex path=" {PATH TO SHADER SOURCE} "/>
+        <fragment path=" {PATH TO SHADER SOURCE} " />
+        
+        <!-- I'm only planning on using vertex and fragment shaders, at least for now -->
+    </program>
+    ...
+</root>
+
+For {OTHER} stuff:
+
+todo :)

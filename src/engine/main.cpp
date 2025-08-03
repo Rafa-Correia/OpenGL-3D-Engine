@@ -29,7 +29,7 @@
 
 #define LOG_LENGTH (GLsizei)512
 
-GLuint VAO, VBO;
+GLuint VAO, VBO, EBO;
 GLuint shader_program_g;
 
 /**
@@ -40,27 +40,28 @@ GLuint shader_program_g;
 const char vertex_shader_glsl[] = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
-out vec4 vertexColor;
 void main() {
     gl_Position = vec4(aPos, 1.0);
-    vertexColor = vec4(0.5, 0.0, 0.0, 1.0);
 })";
 
 const char fragment_shader_glsl[] = R"(
 #version 330 core
-in vec4 vertexColor;
 out vec4 FragColor;
 void main() {
-    FragColor = vertexColor;
+    FragColor = vec4(0.0, 0.5, 0.0, 1.0);
 })";
 
-const float triangle_vertices[] = {
-    -0.9f, -0.9f, 0.0f,
-    -0.9f, 0.9f, 0.0f,
-    0.0f, 0.9f, 0.0f};
+const float vertices[] = {
+    0.5f, 0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f,
+    -0.5f, 0.5f, 0.0f};
 
-GLuint
-compile_shader(GLenum shader_type, const char *shader_source)
+const unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3};
+
+GLuint compile_shader(GLenum shader_type, const char *shader_source)
 {
     GLuint shader = glCreateShader(shader_type);
 
@@ -115,10 +116,9 @@ void render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program_g);
-
     glBindVertexArray(VAO);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 
     glutSwapBuffers();
     return;
@@ -158,11 +158,15 @@ int main(int argc, char **argv)
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
