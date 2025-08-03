@@ -5,6 +5,10 @@ target_include_directories(engine PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 # i dont think this is needed?
 # im linking everything in the main CMakeLists file
+target_link_libraries(engine
+    PRIVATE
+        external
+)
 
 if (WIN32)
     target_include_directories(engine PRIVATE

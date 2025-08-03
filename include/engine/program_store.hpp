@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <unordered_map>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -19,14 +20,12 @@
 #include "external/tinyxml2.h"
 #include "helper/printer.hpp"
 
-struct program_standin
+#define LOG_LENGTH 512
+
+typedef struct program_standin__ // this is only used until shader class is created, afterwards, it will merely have a name for lookup (idk how to) and a pointer to the shader instance
 {
-    const char *name = nullptr;
     GLuint program = 0;
-    GLuint vertex_shader = 0;
-    GLuint fragment_shader = 0;
-    bool is_program_compiled = false;
-};
+} program_standin;
 
 class program_store
 {
@@ -34,16 +33,19 @@ public:
     static program_store *get_instance();
     void load(const char *config_path);
 
-    void get_program(const char *program_name);
+    GLuint get_program(const char *program_name);
     void del_program(const char *);
 
 private:
     bool has_loaded = false;
 
-    std::vector<struct program_standin> programs;
+    std::unordered_map<std::string, program_standin> programs; // after creating a shader class, use it here
 
     program_store();
     static program_store *instance;
+
+    static inline GLuint compile_shader(GLenum shader_type, const char *shader_source);
+    static inline GLuint create_shader_program(const char *vertex_source, const char *fragment_source);
 };
 
 #endif

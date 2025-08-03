@@ -27,7 +27,7 @@
 
 #endif
 
-#define LOG_LENGTH (GLsizei)512
+#include "engine/program_store.hpp"
 
 GLuint VAO, VBO, EBO;
 GLuint shader_program_g;
@@ -37,19 +37,6 @@ GLuint shader_program_g;
  * I don't have that setup yet. So like, the shader source (very basic) will
  * stay here.
  */
-const char vertex_shader_glsl[] = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-void main() {
-    gl_Position = vec4(aPos, 1.0);
-})";
-
-const char fragment_shader_glsl[] = R"(
-#version 330 core
-out vec4 FragColor;
-void main() {
-    FragColor = vec4(0.0, 0.5, 0.0, 1.0);
-})";
 
 const float vertices[] = {
     0.5f, 0.5f, 0.0f,
@@ -60,56 +47,6 @@ const float vertices[] = {
 const unsigned int indices[] = {
     0, 1, 3,
     1, 2, 3};
-
-GLuint compile_shader(GLenum shader_type, const char *shader_source)
-{
-    GLuint shader = glCreateShader(shader_type);
-
-    glShaderSource(shader, 1, &shader_source, nullptr);
-
-    glCompileShader(shader);
-
-    // check if compilation success
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        char shader_log[LOG_LENGTH];
-        glGetShaderInfoLog(shader, LOG_LENGTH, nullptr, shader_log);
-        std::cout << "Failed to compile shader: " << shader_log << std::endl;
-    }
-
-    return shader;
-}
-
-/**
- * For now, only supports vertex and fragment!
- */
-GLuint create_shader_program(const char *vertex_source, const char *fragment_source)
-{
-    GLuint vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_source);
-    GLuint fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fragment_source);
-
-    GLuint shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-
-    glLinkProgram(shader_program);
-
-    // check if program link success
-    GLint success;
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-
-    if (!success)
-    {
-        char program_log[LOG_LENGTH];
-        glGetProgramInfoLog(shader_program, LOG_LENGTH, nullptr, program_log);
-
-        std::cout << "Failed to link shader program: " << program_log << std::endl;
-    }
-
-    return shader_program;
-}
 
 void render()
 {
@@ -154,7 +91,10 @@ int main(int argc, char **argv)
     glewInit();
 #endif
 
-    shader_program_g = create_shader_program(vertex_shader_glsl, fragment_shader_glsl);
+    program_store *instance = program_store::get_instance();
+    instance->load("./config/shaders.xml");
+
+    shader_program_g = instance->get_program("test");
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);

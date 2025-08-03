@@ -1,7 +1,6 @@
 <root>
     <program name="test">
-        <vertex path="../assets/shaders/vertex_test.glsl" />
-        <fragment path="../assets/shaders/fragment_test.glsl" />
+        <vertex path="./assets/shaders/vertex_test.glsl" />
+        <fragment path="./assets/shaders/fragment_test.glsl" />
     </program>
-
 </root>
