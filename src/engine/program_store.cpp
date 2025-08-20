@@ -34,8 +34,7 @@ void program_store::load(const char *config_path)
     {
         error_ss << "Failed to load file: " << config_path << std::endl;
         printer::print_exception(error_ss.str(), caller);
-        // would need to actually throw an exception here. DO THAT LATER!
-        return;
+        throw FailedToLoadException(error_ss.str());
     }
 
     tinyxml2::XMLElement *root = doc.RootElement();
@@ -43,15 +42,13 @@ void program_store::load(const char *config_path)
     {
         error_ss << "Failed to get root element." << std::endl;
         printer::print_exception(error_ss.str(), caller);
-        // once again, throw exception here!
-        return;
+        throw FailedToLoadException(error_ss.str());
     }
     if (std::string(root->Value()) != "root")
     {
         error_ss << "Root element (" << root->Value() << ") is not valid." << std::endl;
         printer::print_exception(error_ss.str(), caller);
-        // EXCEPTION HERE!
-        return;
+        throw FailedToLoadException(error_ss.str());
     }
 
     tinyxml2::XMLElement *program_elem = root->FirstChildElement("program");
@@ -59,8 +56,7 @@ void program_store::load(const char *config_path)
     {
         error_ss << "No program element found!" << std::endl;
         printer::print_exception(error_ss.str(), caller);
-        // exception here
-        return;
+        throw FailedToLoadException(error_ss.str());
     }
     while (program_elem)
     {
@@ -68,15 +64,13 @@ void program_store::load(const char *config_path)
         {
             error_ss << "Program element doesn't have name attribute." << std::endl;
             printer::print_exception(error_ss.str(), caller);
-            // exception here
-            return;
+            throw FailedToLoadException(error_ss.str());
         }
         if (std::string(program_elem->Value()) != "program")
         {
             error_ss << "Invalid element (not program) found!" << std::endl;
             printer::print_exception(error_ss.str(), caller);
-            // exception here
-            return;
+            throw FailedToLoadException(error_ss.str());
         }
 
         program_standin program;
@@ -86,16 +80,14 @@ void program_store::load(const char *config_path)
         {
             error_ss << "Program is missing one or both shader sources." << std::endl;
             printer::print_exception(error_ss.str(), caller);
-            // exception here
-            return;
+            throw FailedToLoadException(error_ss.str());
         }
         const char *vertex_path = vertex_elem->Attribute("path"), *fragment_path = fragment_elem->Attribute("path");
         if (!vertex_path || !fragment_path)
         {
             error_ss << "Couldn't find path to one or both shader sources." << std::endl;
             printer::print_exception(error_ss.str(), caller);
-            // exception here
-            return;
+            throw FailedToLoadException(error_ss.str());
         }
 
         std::ifstream vertex_file(vertex_path), fragment_file(fragment_path);

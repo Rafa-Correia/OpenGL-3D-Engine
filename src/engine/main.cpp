@@ -28,6 +28,7 @@
 #endif
 
 #include "engine/program_store.hpp"
+#include "math/vec3.hpp"
 
 GLuint VAO, VBO, EBO;
 GLuint shader_program_g;
@@ -66,21 +67,16 @@ void idle()
     return;
 }
 
-int main(int argc, char **argv)
+int init(int &argc, char **argv)
 {
-    /**
-     * For now, I will use hardcoded values.
-     *
-     *   * CHANGE LATER TO ACCEPT A SCENE FILE AS AN ENTRY POINT! *
-     *   * MAYBE A CONFIGURATION FILE INSTEAD OF A SCENE, WE'LL SEE *
-     */
-
     int win_width = 200;
     int win_height = 200;
+    int init_win_pos_x = 100;
+    int init_win_pos_y = 100;
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowPosition(init_win_pos_x, init_win_pos_y);
     glutInitWindowSize(win_width, win_height);
     glutCreateWindow("test");
 
@@ -92,9 +88,44 @@ int main(int argc, char **argv)
 #endif
 
     program_store *instance = program_store::get_instance();
-    instance->load("./config/shaders.xml");
+
+    try
+    {
+        instance->load("./config/shaders.xml");
+    }
+    catch (const std::exception &e)
+    {
+        return 1;
+    }
 
     shader_program_g = instance->get_program("test");
+    return 0;
+}
+
+void test_function()
+{
+    vec3<float> test_empty_constr;
+    test_empty_constr.print_values();
+}
+
+int main(int argc, char **argv)
+{
+    /**
+     * For now, I will use hardcoded values.
+     *
+     *   * CHANGE LATER TO ACCEPT A SCENE FILE AS AN ENTRY POINT! *
+     *   * MAYBE A CONFIGURATION FILE INSTEAD OF A SCENE, WE'LL SEE *
+     *
+     *  (whats a scene if not a config file, dummy)
+     */
+
+    test_function();
+
+    if (init(argc, argv))
+    {
+        printer::print_exception("init failed!");
+        return 1;
+    }
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);

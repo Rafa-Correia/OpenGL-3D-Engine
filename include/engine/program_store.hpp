@@ -48,4 +48,18 @@ private:
     static inline GLuint create_shader_program(const char *vertex_source, const char *fragment_source);
 };
 
+class FailedToLoadException : public std::exception
+{
+public:
+    FailedToLoadException(std::string what_msg) : what_msg(what_msg) {};
+
+    const char *what() const noexcept
+    {
+        return what_msg.c_str();
+    }
+
+private:
+    std::string what_msg;
+};
+
 #endif
