@@ -51,7 +51,7 @@ private:
 class FailedToLoadException : public std::exception
 {
 public:
-    FailedToLoadException(std::string what_msg) : what_msg(what_msg) {};
+    FailedToLoadException(std::string what_msg, std::string caller = "") : what_msg(what_msg), caller(caller) {};
 
     const char *what() const noexcept
     {
@@ -60,6 +60,7 @@ public:
 
 private:
     std::string what_msg;
+    std::string caller;
 };
 
 #endif

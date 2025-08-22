@@ -36,7 +36,7 @@ public:
     void normalize()
     {
         if (this->_magnitude > 0)
-            this /= this->_magnitude;
+            *this /= this->_magnitude;
     }
 
     // operations

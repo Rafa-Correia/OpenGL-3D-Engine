@@ -1,7 +1,10 @@
 <root>
-    <program name="test">
-        <vertex path="./assets/shaders/vertex_test.glsl" />
-        <fragment path="./assets/shaders/fragment_test.glsl" />
+    <program name="default">
+        <vertex path="./assets/shaders/vertex_default.glsl" />
+        <fragment path="./assets/shaders/fragment_default.glsl" />
     </program>
-
+    <program name="basic">
+        <vertex path="./assets/shaders/vertex_basic.glsl" />
+        <fragment path="./assets/shaders/fragment_basic.glsl" />
+    </program>
 </root>
