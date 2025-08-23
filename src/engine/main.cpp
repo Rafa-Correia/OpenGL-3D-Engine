@@ -47,12 +47,12 @@ typedef int (*PFNGLXSWAPINTERVALSGIPROC)(int);
 #include "math/vec3.hpp"
 #include "math/mat4.hpp"
 
-GLuint VAO, VBO, EBO;
+//GLuint VAO, VBO, EBO;
 GLuint shader_program_g;
 GLuint shader_program_basic;
 
 camera *cam;
-float cam_fov, cam_near, cam_far;
+float cam_fov = 90, cam_near = 0.1f, cam_far = 1000.0f;
 
 bool key_states[256];
 
@@ -66,6 +66,8 @@ int init_win_pos_x = 100;
 int init_win_pos_y = 100;
 
 object *test_obj = nullptr;
+
+bool draw_axis = true;
 
 void disable_vsync()
 {
@@ -120,7 +122,7 @@ void change_window_size(int w, int h)
     glViewport(0, 0, w, h);
 }
 
-const float vertices[] = {
+/* const float vertices[] = {
     0.5f, 0.5f, 0.0f,
     0.5f, -0.5f, 0.0f,
     -0.5f, -0.5f, 0.0f,
@@ -128,11 +130,35 @@ const float vertices[] = {
 
 const unsigned int indices[] = {
     0, 1, 3,
-    1, 2, 3};
+    1, 2, 3}; */
 
 void render()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glLoadIdentity();
+    glMultMatrixf(cam->get_view_matrix());
+
+    if (draw_axis)
+	{
+		glBegin(GL_LINES);
+		// x axis
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glVertex3f(-100.0f, 0.0f, 0.0f);
+		glVertex3f(100.0f, 0.0f, 0.0f);
+
+		// y axis
+		glColor3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(0.0f, -100.0f, 0.0f);
+		glVertex3f(0.0f, 100.0f, 0.0f);
+
+		// z axis
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(0.0f, 0.0f, -100.0f);
+		glVertex3f(0.0f, 0.0f, 100.0f);
+		glEnd();
+	}
+    
 
     test_obj->render(projection_matrix, cam->get_view_matrix());
 
@@ -282,6 +308,11 @@ int init(int &argc, char **argv)
 
     disable_vsync();
 
+    glFrontFace(GL_CCW);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+
 #ifndef __APPLE__
     glewInit();
 #endif
@@ -304,7 +335,7 @@ int init(int &argc, char **argv)
 
 void test_function()
 {
-    test_obj = new object(std::string("C:\\Users\\rafae\\Desktop\\sphere.obj"), shader_program_basic);
+    test_obj = new object(std::string("C:\\Users\\azeve\\Desktop\\weird.obj"), shader_program_basic);
 }
 
 int main(int argc, char **argv)
@@ -330,9 +361,15 @@ int main(int argc, char **argv)
     catch (FailedToParseException &e)
     {
         printer::print_exception(e.what(), e.caller);
+        return 1;
+    }
+    catch (std::exception& e) 
+    {
+        printer::print_exception(e.what());
+        return 1;
     }
 
-    glGenVertexArrays(1, &VAO);
+/*     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
@@ -345,7 +382,7 @@ int main(int argc, char **argv)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(0); */
 
     float ratio = win_width * 1.0 / win_height;
     projection_matrix = mat4::Projection(cam_fov, ratio, cam_near, cam_far);

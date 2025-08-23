@@ -8,6 +8,7 @@
 #include <sstream>
 #include <tuple>
 #include <map>
+#include <array>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
