@@ -1,24 +1,19 @@
-#include "engine/program_store.hpp"
+#include "engine/shader_store.hpp"
 
-program_store *program_store::instance = nullptr;
+shader_store *shader_store::instance = nullptr;
 
-program_store::program_store()
+shader_store *shader_store::get_instance()
 {
-    return;
-}
-
-program_store *program_store::get_instance()
-{
-    if (program_store::instance != nullptr)
+    if (shader_store::instance != nullptr)
     {
-        return program_store::instance;
+        return shader_store::instance;
     }
 
-    program_store::instance = new program_store();
-    return program_store::instance;
+    shader_store::instance = new shader_store();
+    return shader_store::instance;
 }
 
-void program_store::load(const char *config_path)
+void shader_store::load(const char *config_path)
 {
     const char caller[] = "program_store::load(...)";
 
@@ -73,8 +68,6 @@ void program_store::load(const char *config_path)
             throw FailedToLoadException(error_ss.str());
         }
 
-        program_standin program;
-
         tinyxml2::XMLElement *vertex_elem = program_elem->FirstChildElement("vertex"), *fragment_elem = program_elem->FirstChildElement("fragment");
         if (!vertex_elem || !fragment_elem)
         {
@@ -90,81 +83,23 @@ void program_store::load(const char *config_path)
             throw FailedToLoadException(error_ss.str());
         }
 
-        std::ifstream vertex_file(vertex_path), fragment_file(fragment_path);
-        std::ostringstream oss_v, oss_f;
-        oss_v << vertex_file.rdbuf();
-        oss_f << fragment_file.rdbuf();
+        shader new_shader = shader(std::string(vertex_path), std::string(fragment_path));
 
-        program.program = create_shader_program(oss_v.str().c_str(), oss_f.str().c_str());
-
-        this->programs[program_elem->Attribute("name")] = program;
+        this->shaders[program_elem->Attribute("name")] = new_shader;
         program_elem = program_elem->NextSiblingElement("program");
     }
 }
 
-GLuint program_store::get_program(const char *program_name)
+shader shader_store::get_shader(const char *shader_name)
 {
-    auto it = this->programs.find(program_name);
-    if (it == this->programs.end())
+    auto it = this->shaders.find(shader_name);
+    if (it == this->shaders.end())
     {
-        return 0;
+        throw FailedToLoadException("ACtually didnt fail to load jsut didnt find shader");
     }
     else
     {
-        const program_standin &res = it->second;
-        return res.program;
+        shader res = it->second;
+        return res;
     }
-}
-
-GLuint program_store::compile_shader(GLenum shader_type, const char *shader_source)
-{
-    GLuint shader = glCreateShader(shader_type);
-
-    glShaderSource(shader, 1, &shader_source, nullptr);
-
-    glCompileShader(shader);
-
-    // check if compilation success
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        char shader_log[LOG_LENGTH];
-        glGetShaderInfoLog(shader, LOG_LENGTH, nullptr, shader_log);
-        std::cout << "Failed to compile shader: " << shader_log << std::endl;
-
-        return 0;
-    }
-
-    return shader;
-}
-
-/**
- * For now, only supports vertex and fragment!
- */
-GLuint program_store::create_shader_program(const char *vertex_source, const char *fragment_source)
-{
-    GLuint vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_source);
-    GLuint fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fragment_source);
-
-    GLuint shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-
-    glLinkProgram(shader_program);
-
-    // check if program link success
-    GLint success;
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-
-    if (!success)
-    {
-        char program_log[LOG_LENGTH];
-        glGetProgramInfoLog(shader_program, LOG_LENGTH, nullptr, program_log);
-
-        std::cout << "Failed to link shader program: " << program_log << std::endl;
-        return 0;
-    }
-
-    return shader_program;
 }

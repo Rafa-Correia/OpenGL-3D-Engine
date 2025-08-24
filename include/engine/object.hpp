@@ -25,6 +25,9 @@
 #include "math/vec2.hpp"
 #include "math/mat4.hpp"
 
+#include "engine/shader.hpp"
+#include "engine/shader_store.hpp"
+
 typedef struct vertex_
 {
     vec3<float> pos;
@@ -35,13 +38,20 @@ typedef struct vertex_
 class object
 {
 public:
-    object(std::string fpath, GLuint shader_program) : fpath(fpath), shader_program(shader_program) { this->_load(fpath); }
+    object(std::string fpath, std::string shader_name) : wavefront_fpath(fpath), shader_name(shader_name)
+    {
+        shader_store *instance = shader_store::get_instance();
+        this->s = instance->get_shader(this->shader_name.c_str());
+
+        this->_load(fpath);
+    }
     void render(mat4 projection, mat4 view);
 
 private:
-    std::string fpath;
+    std::string wavefront_fpath;
     bool loaded = false;
-    GLuint shader_program = 0;
+    std::string shader_name;
+    shader s;
     GLuint VAO = 0, VBO = 0, EBO = 0;
     size_t i_count = 0;
     mat4 model = mat4::Identity();

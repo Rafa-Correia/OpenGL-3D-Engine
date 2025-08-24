@@ -55,7 +55,8 @@ void object::_load(std::string &fpath)
             if (!tok.empty())
                 tokens.push_back(tok);
         }
-        if (tokens.empty()) continue;
+        if (tokens.empty())
+            continue;
 
         std::string t0 = tokens.at(0);
 
@@ -113,7 +114,7 @@ void object::_load(std::string &fpath)
                 continue;
             }
 
-            // this bit is just for triangulating any n-gon 
+            // this bit is just for triangulating any n-gon
             for (size_t i = 1; i + 2 < tokens.size(); i++)
             {
                 std::array<std::string, 3> tri = {tokens[1], tokens[i + 1], tokens[i + 2]};
@@ -135,9 +136,12 @@ void object::_load(std::string &fpath)
                         vn = std::stoi(vertex_toks[2]);
 
                     // handle negatives
-                    if (v < 0) v = (positions.size() / 3) + v + 1;
-                    if (vt < 0) vt = (texcoords.size() / 2) + vt + 1;
-                    if (vn < 0) vn = (normals.size() / 3) + vn + 1;
+                    if (v < 0)
+                        v = (positions.size() / 3) + v + 1;
+                    if (vt < 0)
+                        vt = (texcoords.size() / 2) + vt + 1;
+                    if (vn < 0)
+                        vn = (normals.size() / 3) + vn + 1;
 
                     std::tuple<int, int, int> key(v, vt, vn);
                     auto it = vertex_map.find(key);
@@ -179,9 +183,9 @@ void object::_load(std::string &fpath)
     for (const auto &v : vertices)
     {
         mesh.insert(mesh.end(),
-        { v.pos.x, v.pos.y, v.pos.z,
-          v.normal.x, v.normal.y, v.normal.z,
-          v.texcoord.x, v.texcoord.y });
+                    {v.pos.x, v.pos.y, v.pos.z,
+                     v.normal.x, v.normal.y, v.normal.z,
+                     v.texcoord.x, v.texcoord.y});
     }
 
     this->i_count = indices.size();
@@ -207,19 +211,13 @@ void object::_load(std::string &fpath)
     glEnableVertexAttribArray(2);
 }
 
-
 void object::render(mat4 projection, mat4 view)
 {
-    glUseProgram(this->shader_program);
-    GLint proj_loc = glGetUniformLocation(this->shader_program, "projection");
-    GLint view_loc = glGetUniformLocation(this->shader_program, "view");
-    GLint model_loc = glGetUniformLocation(this->shader_program, "model");
+    this->s.use();
 
-    // std::cout << "proj_loc: " << proj_loc << " view_loc: " << view_loc << " model_loc: " << model_loc << std::endl;
-
-    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, projection);
-    glUniformMatrix4fv(view_loc, 1, GL_FALSE, view);
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, model);
+    this->s.uset_mat4("projection", projection);
+    this->s.uset_mat4("view", view);
+    this->s.uset_mat4("model", model);
 
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, this->i_count, GL_UNSIGNED_INT, 0);

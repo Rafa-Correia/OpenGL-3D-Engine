@@ -40,16 +40,12 @@ typedef int (*PFNGLXSWAPINTERVALSGIPROC)(int);
 
 #endif
 
-#include "engine/program_store.hpp"
+#include "engine/shader_store.hpp"
 #include "engine/object.hpp"
 #include "engine/camera.hpp"
 
 #include "math/vec3.hpp"
 #include "math/mat4.hpp"
-
-//GLuint VAO, VBO, EBO;
-GLuint shader_program_g;
-GLuint shader_program_basic;
 
 camera *cam;
 float cam_fov = 90, cam_near = 0.1f, cam_far = 1000.0f;
@@ -122,16 +118,6 @@ void change_window_size(int w, int h)
     glViewport(0, 0, w, h);
 }
 
-/* const float vertices[] = {
-    0.5f, 0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
-    -0.5f, 0.5f, 0.0f};
-
-const unsigned int indices[] = {
-    0, 1, 3,
-    1, 2, 3}; */
-
 void render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -140,25 +126,24 @@ void render()
     glMultMatrixf(cam->get_view_matrix());
 
     if (draw_axis)
-	{
-		glBegin(GL_LINES);
-		// x axis
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glVertex3f(-100.0f, 0.0f, 0.0f);
-		glVertex3f(100.0f, 0.0f, 0.0f);
+    {
+        glBegin(GL_LINES);
+        // x axis
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(-100.0f, 0.0f, 0.0f);
+        glVertex3f(100.0f, 0.0f, 0.0f);
 
-		// y axis
-		glColor3f(0.0f, 1.0f, 0.0f);
-		glVertex3f(0.0f, -100.0f, 0.0f);
-		glVertex3f(0.0f, 100.0f, 0.0f);
+        // y axis
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(0.0f, -100.0f, 0.0f);
+        glVertex3f(0.0f, 100.0f, 0.0f);
 
-		// z axis
-		glColor3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(0.0f, 0.0f, -100.0f);
-		glVertex3f(0.0f, 0.0f, 100.0f);
-		glEnd();
-	}
-    
+        // z axis
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.0f, 0.0f, -100.0f);
+        glVertex3f(0.0f, 0.0f, 100.0f);
+        glEnd();
+    }
 
     test_obj->render(projection_matrix, cam->get_view_matrix());
 
@@ -312,12 +297,11 @@ int init(int &argc, char **argv)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-
 #ifndef __APPLE__
     glewInit();
 #endif
 
-    program_store *instance = program_store::get_instance();
+    shader_store *instance = shader_store::get_instance();
 
     try
     {
@@ -328,14 +312,12 @@ int init(int &argc, char **argv)
         return 1;
     }
 
-    shader_program_g = instance->get_program("default");
-    shader_program_basic = instance->get_program("basic");
     return 0;
 }
 
 void test_function()
 {
-    test_obj = new object(std::string("C:\\Users\\azeve\\Desktop\\weird.obj"), shader_program_basic);
+    test_obj = new object(std::string("C:\\Users\\azeve\\Desktop\\weird.obj"), "basic");
 }
 
 int main(int argc, char **argv)
@@ -353,6 +335,7 @@ int main(int argc, char **argv)
         printer::print_exception("init failed!");
         return 1;
     }
+    printer::print_info("init is ago!");
 
     try
     {
@@ -363,26 +346,28 @@ int main(int argc, char **argv)
         printer::print_exception(e.what(), e.caller);
         return 1;
     }
-    catch (std::exception& e) 
+    catch (std::exception &e)
     {
         printer::print_exception(e.what());
         return 1;
     }
 
-/*     glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    printer::print_info("Test function is ago!");
 
-    glBindVertexArray(VAO);
+    /*     glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0); */
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+        glEnableVertexAttribArray(0); */
 
     float ratio = win_width * 1.0 / win_height;
     projection_matrix = mat4::Projection(cam_fov, ratio, cam_near, cam_far);
